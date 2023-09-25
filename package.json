@@ -1,0 +1,17 @@
+{
+  "name": "ch_entregable_3",
+  "version": "1.0.0",
+  "description": "desafio entregable 3, creacion de servidor con express y ejemplo con peticiones get.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+   "start":"nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemon": "^3.0.1"
+  }
+}
