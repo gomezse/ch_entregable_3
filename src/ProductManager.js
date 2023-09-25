@@ -41,7 +41,6 @@ class ProductManager {
       
         try {
             if (existsSync(path)) {
-                console.log("entro aca", limit, "this path: ", path);
                 const productsFile = await promises.readFile(path, 'utf-8');
                 const productsData = JSON.parse(productsFile);
                 return limit ? productsData.slice(0, +limit) : productsData;
