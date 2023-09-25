@@ -16,33 +16,35 @@ class ProductManager {
     validate = (title, description, price, thumbnail, code, stock) => title && description && price && thumbnail && code && stock;
 
     //Devolver true en caso de encontrar un objeto con el code, caso contrario false.
-    async existCode(code, path) {
-        const products = await this.getProducts(path);
+    async existCode(code) {
+        const products = await this.getProducts();
         const existingProduct = products.find(product => product.code === code);
 
         return Boolean(existingProduct);
     }
 
     //Obtener un objeto del archivo mediante su id.
-    async getProductById(searchId, path) {
+    async getProductById(searchId) {
         try {
-            const products = await this.getProducts(path);
+            const products = await this.getProducts();
             const product = products.find(product => product.id === searchId);
-            return product;    
+            return product;
         } catch (error) {
-            return error;    
+            return error;
         }
-    
+
     }
 
     //Obtener el listado de productos del archivo.
-    async getProducts(path,queryObj) {
-        const { limit =null} = queryObj;
+    async getProducts(queryObj = {}) {
+        const { limit } = queryObj;
+      
         try {
             if (existsSync(path)) {
+                console.log("entro aca", limit, "this path: ", path);
                 const productsFile = await promises.readFile(path, 'utf-8');
                 const productsData = JSON.parse(productsFile);
-                return limit ? productsData.slice(0, +limit) : productsData;                    
+                return limit ? productsData.slice(0, +limit) : productsData;
             } else {
                 return [];
             }
@@ -52,8 +54,8 @@ class ProductManager {
     }
 
     //Agregar un nuevo producto.
-    async addProduct(path, title, description, price, thumbnail, code, stock) {
-        try {        
+    async addProduct(title, description, price, thumbnail, code, stock) {
+        try {
             if (!this.validate(title, description, price, thumbnail, code, stock)) {
                 return console.error('Debe llenar todos los campos, son obligatorios.');
             }
@@ -61,15 +63,15 @@ class ProductManager {
             //El control de code repetido, solo se hace en caso de que el archivo exista.
             if (existsSync(path)) {
 
-                const existCode = await this.existCode(code, path);
+                const existCode = await this.existCode(code);
 
                 if (existCode) {
                     return console.error('El codigo ingresado ya existe.')
                 }
             }
 
-    
-            const products = await this.getProducts(path);
+
+            const products = await this.getProducts();
 
             const product = {
                 id: !products.length ? 1 : products[products.length - 1].id + 1,
@@ -78,14 +80,13 @@ class ProductManager {
                 price,
                 thumbnail,
                 code,
-                stock                
+                stock
             }
-            
+
             products.push(product);
             await promises.writeFile(path, JSON.stringify(products));
             return product;
         } catch (error) {
-            console.log('tenemos error',error);
             return error;
         }
     }
@@ -93,27 +94,27 @@ class ProductManager {
 
 
     //Eliminar un objeto del archivo
-    async deleteProduct(path, id) { 
+    async deleteProduct(id) {
         try {
             const products = await this.getUsers({});
             const product = products.find((u) => u.id === id);
 
             if (product) {
-              const newArrayProducts = products.filter((product) => product.id !== id);
-              await promises.writeFile(path, JSON.stringify(newArrayProducts));
+                const newArrayProducts = products.filter((product) => product.id !== id);
+                await promises.writeFile(path, JSON.stringify(newArrayProducts));
             }
-            
+
             return product;
-          
+
         } catch (error) {
             return error;
-          }
+        }
     }
 
     //Modificar parcial o total los atributos de un objeto del archivo.(sin modificar su id)
-    async updateProduct(path, id, updatedFields) {
+    async updateProduct(id, updatedFields) {
         try {
-            const products = await this.getProducts(path);
+            const products = await this.getProducts();
             const productIndex = products.findIndex(product => product.id === id);
 
             if (productIndex === -1) {
@@ -126,32 +127,36 @@ class ProductManager {
             updatedProduct.id = products[productIndex].id;
 
             products[productIndex] = updatedProduct;
-            products.splice(index,1,updatedProduct);
+            products.splice(index, 1, updatedProduct);
             await promises.writeFile(path, JSON.stringify(products));
 
             return updatedProduct;
-        
+
         } catch (error) {
             return error;
-        }            
+        }
     }
 
 }
 
-export const manager = new  ProductManager();
+export const manager = new ProductManager();
 
 
 
-  async function test() {
+async function test() {
     const manager = new ProductManager();
-    await manager.addProduct(path,"palo de escoba","madera",350,2,"as123",2);
-    await manager.addProduct(path,"palo","plastico",350,2,"asv123",24);
-    await manager.addProduct(path,"escoba","para barrer",450,2,"asr123",1);
-    await manager.addProduct(path,"termo","acero inoxidable",650,3,"a1s123",2);
-    await manager.addProduct(path,"pc","hp",950,2,"ass123",2);
-    await manager.addProduct(path,"cebolla","criolla",1350,1,"as13",2);
-    
+    //creacion de los 10 productos para el testing 
+    // await manager.addProduct("palo de escoba","madera",350,2,"as123",2);
+    // await manager.addProduct("palo","plastico",350,2,"asv123",24);
+    // await manager.addProduct("escoba","para barrer",450,2,"asr123",1);
+    // await manager.addProduct("termo","acero inoxidable",650,3,"a1s123",2);
+    // await manager.addProduct("pc","hp",950,2,"ass123",2);
+    // await manager.addProduct("cebolla","criolla",1350,1,"as13",2);    
+    // await manager.addProduct("remera","manga corta",250,2,"as33123",1);
+    // await manager.addProduct("bermuda","jean",650,3,"aacc",2);
+    // await manager.addProduct("sombrero","pana",950,2,"ttppss1",2);
+    // await manager.addProduct("reloj","smart watch",1350,1,"as12df",2);
 
-  }
-  
-  test();
+}
+
+test();
